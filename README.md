@@ -1,5 +1,3 @@
-Here's the reformatted content for a `README.md` file:
-
 # Coqui TTS Web Application
 
 This is a simple web application that utilizes Coqui TTS to convert text into speech using various voice models. The application allows users to select different voices and generate audio files from text input.
