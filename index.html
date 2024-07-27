@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Coqui TTS Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        textarea, button, #audio-player { width: 100%; margin-bottom: 10px; }
+        #speed-control { width: 80%; }
+    </style>
+</head>
+<body>
+    <h1>Coqui TTS Web Client</h1>
+    <textarea id="text-input" rows="4" placeholder="Enter text to convert to speech"></textarea>
+    <select id="speaker-select">
+        <option value="">Select a speaker</option>
+    </select>
+    <button onclick="generateSpeech()">Generate Speech</button>
+    <audio id="audio-player" controls></audio>
+    <div>
+        <input type="range" id="speed-control" min="0.5" max="3" step="0.1" value="1">
+        <span id="speed-display">1x</span>
+    </div>
+
+    <script>
+        // Fetch available speakers when the page loads
+        window.onload = async function() {
+            const response = await fetch('http://localhost:5002/api/speakers');
+            const data = await response.json();
+            const speakerSelect = document.getElementById('speaker-select');
+            data.speakers.forEach(speaker => {
+                const option = document.createElement('option');
+                option.value = speaker;
+                option.textContent = speaker;
+                speakerSelect.appendChild(option);
+            });
+        }
+
+        async function generateSpeech() {
+            const text = document.getElementById('text-input').value;
+            const speakerId = document.getElementById('speaker-select').value;
+            const response = await fetch('http://localhost:5002/api/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, speaker_id: speakerId })
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.src = audioUrl;
+        }
+
+        document.getElementById('speed-control').addEventListener('input', function() {
+            const speed = this.value;
+            document.getElementById('speed-display').textContent = speed + 'x';
+            document.getElementById('audio-player').playbackRate = speed;
+        });
+    </script>
+</body>
+</html
